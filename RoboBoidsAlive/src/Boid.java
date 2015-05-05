@@ -9,10 +9,10 @@ import java.util.Random;
 
 public class Boid extends WorldObject {
 	
-	private final int size = 14;			//20
-	private final double radius = 40 ;		//50
-	private final double angle = 20;		//120
-	private final double minDistance = 20;	//20
+	private final int size = 14;			
+	private final double radius = 45 ;		
+	private final double angle = 20;		
+	private final double minDistance = 20;	
 	private final double maxVelocity = 3;
 	private double vx, vy;
 	
@@ -31,27 +31,21 @@ public class Boid extends WorldObject {
 	}
 	
 	public void move() {		
-		//Apply Boid rules
-		double[] v1, v2, v3, v4;
-		
 		//get neighbours		
-		ArrayList<Boid> neighbours = getNeighbours();
-		
-		v1 = matchVelocity(neighbours); 
-		v2 = keepDistance(neighbours);
-		v3 = flyTowardsTheCentre(neighbours);
-		v4 = addNoise();
-		
-		double oldVX = vx;
-		double oldVY = vy;
-		
-		vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
-		vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
-		
-		if(neighbours.size() == 0){
-			vx = oldVX;
-			vy = oldVY;
-		}
+		ArrayList<Boid> neighbours = getNeighbours();		
+				
+		//Apply Boid rules
+		if(neighbours.size() != 0){
+			double[] v1, v2, v3, v4;
+					
+			v1 = matchVelocity(neighbours); 
+			v2 = keepDistance(neighbours);
+			v3 = flyTowardsTheCentre(neighbours);
+			v4 = addNoise();
+					
+			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
+			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
+		}	
 		
 		x = x + vx;
 		y = y + vy;
