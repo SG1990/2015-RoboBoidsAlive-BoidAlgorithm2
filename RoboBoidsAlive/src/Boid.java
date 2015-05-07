@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,10 +10,12 @@ import java.util.Random;
 
 public class Boid extends WorldObject {
 	
-	private final int size = 14;			
-	private final double radius = 45 ;		
+	private final int size = 14;
+	private final double sizeX = 12.5;
+    private final double sizeY = 17.5;
+	private final double radius = 35;		
 	private final double angle = 20;		
-	private final double minDistance = 20;	
+	private final double minDistance = 15;	
 	private final double maxVelocity = 3;
 	private double vx, vy;
 	
@@ -98,19 +101,21 @@ public class Boid extends WorldObject {
 		v2[1] = 0;
 		
 		for(Boid n : neighbours) {
-			double xDiff = n.getX() - x; //to local coords
+			double xDiff = n.getX() - x;
 			double yDiff = n.getY() - y;
 			
-//			double[] xyDiff = getLocalNeighbour(n);
+			double[] roboCoords = getRobotCoords(n.getX(), n.getY());
+			double rxDiff = roboCoords[0] - x;
+			double ryDiff = roboCoords[1] - y;
 			
 			double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
 			if(d <= minDistance){						
 				
-				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
-        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
+//				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
+//        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
 				
-//				v2[0] -= (((xyDiff[0] * minDistance) / d) - xyDiff[0]) * (0.15 / neighbours.size());
-//        		v2[1] -= (((xyDiff[1] * minDistance) / d) - xyDiff[1]) * (0.15 / neighbours.size());
+				v2[0] -= (((rxDiff * minDistance) / d) - rxDiff) * (0.15 / neighbours.size());
+        		v2[1] -= (((ryDiff * minDistance) / d) - ryDiff) * (0.15 / neighbours.size());
 			}
 		}
 		
@@ -139,8 +144,7 @@ public class Boid extends WorldObject {
 				
 				v3[0] += ((xDiff * (d - avgD))/d) * (0.15 / neighbours.size()); 
 				v3[1] += ((yDiff * (d - avgD))/d) * (0.15 / neighbours.size());
-			}
-			 
+			}			 
 		}
 		
 		return v3;		
@@ -151,77 +155,72 @@ public class Boid extends WorldObject {
 		v4[0] = 0;
 		v4[1] = 0;
 		
-		v4[0] = ((Math.random() - 0.5) * maxVelocity) * 0.1;
-		v4[1] = ((Math.random() - 0.5) * maxVelocity) * 0.1;
+		v4[0] = ((Math.random() - 0.5) * maxVelocity) * 0.05;
+		v4[1] = ((Math.random() - 0.5) * maxVelocity) * 0.05;
 		
 		return v4;
 	}
 	
-//	private double[] getLocalNeighbour(Boid n) {		
-//		double xDiff = Math.abs(n.getX() - x);
-//		double yDiff = Math.abs(n.getY() - y);
-//		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
-//		
-//		//translate neighbour
-//		double nX = n.getX() - x;
-//		double nY = n.getY() - y;
-//		
-//		//rotate neighbour
-//		double a = getAngleBetween(vx, vy, 0, 2);
-//		if (vx >= 0) a = -a;
-//		
-//		double oldnX = nX;
-//		nX = (nX * Math.cos(a)) + (nY * Math.sin(a));	
-//		nY = (-oldnX * Math.sin(a)) + (nY * Math.cos(a));
-//		
-//		//get the angle between neighbour and self
-//		double b = getAngleBetween(nX, nY, 0, 2);   //given
-//		if (nX >= 0) b = -b;
-//		
-//		//get the neighbour's coordinates; TODO: from maps!
-//		
-//				
-//		//rotate back
-//		a = -a;
-//		double[] localCoords = new double[2];
-//		localCoords[0] = (nX * Math.cos(a)) + (nY * Math.sin(a));
-//		localCoords[1] = (-nX * Math.sin(a)) + (nY * Math.cos(a));
-//		
-//		return localCoords;
-//	}
-	
-	private double[] toLocal(double[] coords) {		
-		double xDiff = Math.abs(coords[0] - x);
-		double yDiff = Math.abs(coords[1] - y);
-		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
+	private double[] getRobotCoords(double nx, double ny) {
+		World world = World.getInstance();
+		double[] gCoords = new double[] {nx, ny};
 		
+		//get xy from the local system
+		double[] lCoords = toLocal(gCoords);
+		
+		//calculate d and round it up
+		double realD = Math.sqrt(Math.pow(lCoords[0], 2) + Math.pow(lCoords[1], 2));
+		if(realD < 5) realD = 5;
+		else if(realD > 45) realD = 45;
+		else realD = Math.round(realD/5) * 5;
+		
+		//calculate alpha and round it up
+		double realA = getAngleBetween(lCoords[0], lCoords[1], 0, 2);
+		realA = Math.toDegrees(realA);
+		if (realA > 90) realA = 90;
+		else realA = Math.round(realA/10) * 10;			
+		
+		//get values from the lookup table
+		double tA = world.lookupTable[(int) realA/10][(int)realD/5 - 1][0];
+		double tD = world.lookupTable[(int) realA/10][(int)realD/5 - 1][1];
+		tD = percentToPX(tD);
+		
+		//get xy according to the lookup table data
+		double rX, rY;
+		tA = Math.toRadians(tA);
+		rX = tD * Math.sin(tA);
+		rY = tD * Math.cos(tA);
+		if(lCoords[0] < 0) rX = -rX;
+		
+		//transform to global
+		double[] rCoords = new double[] {rX, rY};
+		return toGlobal(rCoords);
+	}
+	
+	private double[] toLocal(double[] coords) {				
 		//translate neighbour
 		double nX = coords[0] - x;
 		double nY = coords[1] - y;
 		
 		//rotate neighbour
 		double a = getAngleBetween(vx, vy, 0, 2);
-		if (vx >= 0) a = -a;
+		if (vx < 0) a = -a;
 		
 		double[] localCoords = new double[2];
-		localCoords[0] = (nX * Math.cos(a)) + (nY * Math.sin(a));
-		localCoords[1] = (-nX * Math.sin(a)) + (nY * Math.cos(a));
+		localCoords[0] = (nX * Math.cos(a)) - (nY * Math.sin(a));
+		localCoords[1] = (nX * Math.sin(a)) + (nY * Math.cos(a));
 		
 		return localCoords;
 	}
 	
-	private double[] toGlobal(double[] coords) {		
-		double xDiff = Math.abs(coords[0] - x);
-		double yDiff = Math.abs(coords[1] - y);
-		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
-		
+	private double[] toGlobal(double[] coords) {				
 		//rotate neighbour
 		double a = getAngleBetween(vx, vy, 0, 2);
-		if (vx < 0) a = -a;
+		if (vx >= 0) a = -a;
 		
 		double[] localCoords = new double[2];
-		localCoords[0] = (coords[0] * Math.cos(a)) + (coords[1] * Math.sin(a));
-		localCoords[1] = (-coords[0] * Math.sin(a)) + (coords[1] * Math.cos(a));
+		localCoords[0] = (coords[0] * Math.cos(a)) - (coords[1] * Math.sin(a));
+		localCoords[1] = (coords[0] * Math.sin(a)) + (coords[1] * Math.cos(a));
 		
 		//translate neighbour
 		localCoords[0] += x;
@@ -229,29 +228,6 @@ public class Boid extends WorldObject {
 		
 		return localCoords;
 	}
-	
-//	private double getDirectedAngleBetween(double xDiff, double yDiff) {
-//	double alpha = getAngleBetween(vx, vy, xDiff, yDiff);
-//			
-//	//check direction
-//	double ad = getAngleBetween(xDiff, yDiff, 2, 0);
-//	double av = getAngleBetween(vx, vy, 2, 0);
-//	
-//	if(vy >= 0 && yDiff > 0) {
-//		if(av < ad) alpha = -alpha;
-//	}
-//	else if (vy < 0 && yDiff < 0) {
-//		if(av >= ad) alpha = -alpha;
-//	}
-//	else if (vy >= 0 && yDiff < 0) {
-//		if(av + ad >= 180) alpha = -alpha;
-//	}
-//	else {
-//		if(av + ad < 180) alpha = -alpha;
-//	}
-//	
-//	return alpha;
-//}
 	
 	private double getAngleBetween(double x1, double y1, double x2, double y2) {		
 		double aob = (x1 * x2) + (y1 * y2);
@@ -275,6 +251,11 @@ public class Boid extends WorldObject {
 		if(y < -size) y = world.getBoundsY();
 		if(y > world.getBoundsY()) y = 0;		
 	}
+	
+	public static double percentToPX(double percent){
+		//the ratio chosen due to the greatest consistency of measurements at 40cm
+		return percent * (40 / 86.5);
+	}
 
 	@Override
 	public void draw(Graphics g) {
@@ -284,11 +265,25 @@ public class Boid extends WorldObject {
         AffineTransform oldTransform = g2d.getTransform();
         g2d.translate(x, y);
         
-        Path2D.Double triangle = new Path2D.Double();  
-        triangle.moveTo(-(size/2), size);
-        triangle.lineTo(0, 0);
-        triangle.lineTo((size/2), size);  
-        triangle.closePath();        
+//        Path2D.Double triangle = new Path2D.Double();  
+//        triangle.moveTo(-(size/2), size);
+//        triangle.lineTo(0, 0);
+//        triangle.lineTo((size/2), size);  
+//        triangle.closePath(); 
+        
+        GeneralPath rectangle = new GeneralPath();  
+        rectangle.moveTo(-sizeX/2, -sizeY/2);
+        rectangle.lineTo(-sizeX/2, sizeY/2);
+        rectangle.lineTo(sizeX/2, sizeY/2);
+        rectangle.lineTo(sizeX/2, -sizeY/2);
+        rectangle.closePath();
+        
+        GeneralPath head = new GeneralPath();  
+        head.moveTo(-sizeX/2, -sizeY/2);
+        head.lineTo(-sizeX/2, -sizeY/4);
+        head.lineTo(sizeX/2, -sizeY/4);
+        head.lineTo(sizeX/2, -sizeY/2);
+        head.closePath();   
         
         //rotate
         if (vx < 0){
@@ -298,7 +293,10 @@ public class Boid extends WorldObject {
              g2d.rotate(Math.toRadians(90.0 + Math.atan(vy/vx)*180.0/Math.PI));
         }
         
-        g2d.fill(triangle);        
+        //g2d.fill(triangle); 
+        g2d.fill(rectangle);
+        g2d.setColor(Color.red);
+        g2d.fill(head);   
         g2d.setTransform(oldTransform);        
         g2d.dispose();		
 	}
