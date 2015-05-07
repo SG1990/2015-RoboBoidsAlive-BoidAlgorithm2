@@ -10,12 +10,12 @@ import java.util.Random;
 
 public class Boid extends WorldObject {
 	
-	private final int size = 14;
+	//private final int size = 14;
 	private final double sizeX = 12.5;
-    private final double sizeY = 17.5;
+    private final double sizeY = 22.5;
 	private final double radius = 35;		
 	private final double angle = 20;		
-	private final double minDistance = 15;	
+	private final double minDistance = 17;	
 	private final double maxVelocity = 3;
 	private double vx, vy;
 	
@@ -25,7 +25,9 @@ public class Boid extends WorldObject {
 	public double getVY() { return vy; }
 	public void setVY(double vy) { this.vy = vy; }
 	
-	public double getSize() { return size; }
+	
+	public double getSizeX() { return sizeY; }
+	public double getSizeY() { return sizeY; }
 	
 	public Boid() {
 		Random r = new Random();
@@ -129,15 +131,20 @@ public class Boid extends WorldObject {
 		v3[1] = 0;
 		
 		for(Boid n : neighbours) {
-			avgD = avgD + Math.sqrt(Math.pow(n.getX() - x, 2) + Math.pow(n.getY() - y, 2));
+			double[] roboCoords = getRobotCoords(n.getX(), n.getY());
+//			avgD = avgD + Math.sqrt(Math.pow(n.getX() - x, 2) + Math.pow(n.getY() - y, 2));
+			avgD = avgD + Math.sqrt(Math.pow(roboCoords[0] - x, 2) + Math.pow(roboCoords[1] - y, 2));
 		}
 		
 		if(neighbours.size() > 0)
 			avgD = avgD / neighbours.size();
 		
 		for(Boid n : neighbours) {
-			double xDiff = n.getX() - x;
-			double yDiff = n.getY() - y;
+			double[] roboCoords = getRobotCoords(n.getX(), n.getY());
+//			double xDiff = n.getX() - x;
+//			double yDiff = n.getY() - y;
+			double xDiff = roboCoords[0] - x;
+			double yDiff = roboCoords[1] - y;
 			
 			if(Math.abs(xDiff) > minDistance) {
 				double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
@@ -248,7 +255,7 @@ public class Boid extends WorldObject {
 		World world = World.getInstance() ;
 		if(x < 0) x = world.getBoundsX();
 		if(x > world.getBoundsX()) x = 0;
-		if(y < -size) y = world.getBoundsY();
+		if(y < -sizeY) y = world.getBoundsY();
 		if(y > world.getBoundsY()) y = 0;		
 	}
 	

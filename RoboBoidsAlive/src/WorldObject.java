@@ -1,7 +1,11 @@
 import java.awt.Graphics;
 
+import javax.swing.JPanel;
+
 
 public abstract class WorldObject {
+
+	private static final long serialVersionUID = 1L;
 	protected double x, y;
     
     public double getX() { return x; }

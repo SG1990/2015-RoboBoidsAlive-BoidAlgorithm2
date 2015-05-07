@@ -18,7 +18,12 @@ public class Program {
         f.setVisible(true);
 		
         for(int i = 0 ; i < 25; i++) 
-        	world.createBoid();   
+        	world.createBoid(); 
+        
+//        world.createBoid(200,200);
+//        world.createBoid(205,225);
+//        world.createBoid(190,255);
+//        world.createBoid(200,270);
 	}
 
 }
