@@ -3,7 +3,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -17,14 +16,13 @@ public class Boid extends WorldObject {
 	private final double angle = 20;		
 	private final double minDistance = 17;	
 	private final double maxVelocity = 3;
-	private double vx, vy;
+	private double vx, vy, oldvx, oldvy;
 	
 	public double getVX() { return vx; }
 	public void setVX(double vx) { this.vx = vx; }
 	
 	public double getVY() { return vy; }
 	public void setVY(double vy) { this.vy = vy; }
-	
 	
 	public double getSizeX() { return sizeY; }
 	public double getSizeY() { return sizeY; }
@@ -48,8 +46,16 @@ public class Boid extends WorldObject {
 			v3 = flyTowardsTheCentre(neighbours);
 			v4 = addNoise();
 					
+			oldvx = vx;
+			oldvy = vy;
+			
 			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
 			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
+			
+			if(/*((oldvx >= 0 && vx < 0) || (oldvx < 0 && vx >= 0)) &&*/ (Math.abs(vx - oldvx) > 0.15))
+					vx = oldvx;
+			if(/*((oldvy >= 0 && vy < 0) || (oldvy < 0 && vy >= 0)) &&*/ (Math.abs(vy - oldvy) > 0.15))
+					vy = oldvy;
 		}	
 		
 		x = x + vx;
@@ -113,9 +119,6 @@ public class Boid extends WorldObject {
 			double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
 			if(d <= minDistance){						
 				
-//				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
-//        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
-				
 				v2[0] -= (((rxDiff * minDistance) / d) - rxDiff) * (0.15 / neighbours.size());
         		v2[1] -= (((ryDiff * minDistance) / d) - ryDiff) * (0.15 / neighbours.size());
 			}
@@ -132,7 +135,6 @@ public class Boid extends WorldObject {
 		
 		for(Boid n : neighbours) {
 			double[] roboCoords = getRobotCoords(n.getX(), n.getY());
-//			avgD = avgD + Math.sqrt(Math.pow(n.getX() - x, 2) + Math.pow(n.getY() - y, 2));
 			avgD = avgD + Math.sqrt(Math.pow(roboCoords[0] - x, 2) + Math.pow(roboCoords[1] - y, 2));
 		}
 		
@@ -141,8 +143,6 @@ public class Boid extends WorldObject {
 		
 		for(Boid n : neighbours) {
 			double[] roboCoords = getRobotCoords(n.getX(), n.getY());
-//			double xDiff = n.getX() - x;
-//			double yDiff = n.getY() - y;
 			double xDiff = roboCoords[0] - x;
 			double yDiff = roboCoords[1] - y;
 			
@@ -272,12 +272,6 @@ public class Boid extends WorldObject {
         AffineTransform oldTransform = g2d.getTransform();
         g2d.translate(x, y);
         
-//        Path2D.Double triangle = new Path2D.Double();  
-//        triangle.moveTo(-(size/2), size);
-//        triangle.lineTo(0, 0);
-//        triangle.lineTo((size/2), size);  
-//        triangle.closePath(); 
-        
         GeneralPath rectangle = new GeneralPath();  
         rectangle.moveTo(-sizeX/2, -sizeY/2);
         rectangle.lineTo(-sizeX/2, sizeY/2);
@@ -300,7 +294,6 @@ public class Boid extends WorldObject {
              g2d.rotate(Math.toRadians(90.0 + Math.atan(vy/vx)*180.0/Math.PI));
         }
         
-        //g2d.fill(triangle); 
         g2d.fill(rectangle);
         g2d.setColor(Color.red);
         g2d.fill(head);   
