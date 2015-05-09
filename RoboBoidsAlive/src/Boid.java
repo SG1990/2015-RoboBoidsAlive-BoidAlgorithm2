@@ -15,6 +15,7 @@ public class Boid extends WorldObject {
 	private final double radius = 35;		
 	private final double angle = 20;		
 	private final double minDistance = 17;	
+	private final double strictMinDistance = 11.5;
 	private final double maxVelocity = 3;
 	private double vx, vy, oldvx, oldvy;
 	
@@ -52,11 +53,18 @@ public class Boid extends WorldObject {
 			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
 			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
 			
-			if(/*((oldvx >= 0 && vx < 0) || (oldvx < 0 && vx >= 0)) &&*/ (Math.abs(vx - oldvx) > 0.15))
+			if((Math.abs(vx - oldvx) > 0.15))
 					vx = oldvx;
-			if(/*((oldvy >= 0 && vy < 0) || (oldvy < 0 && vy >= 0)) &&*/ (Math.abs(vy - oldvy) > 0.15))
+			if((Math.abs(vy - oldvy) > 0.15))
 					vy = oldvy;
 		}	
+		
+//		World world = World.getInstance(); //TODO: Not driving through other robots
+//		for(Boid n : world.boids) {
+//			if(n != this) {
+//				
+//			}			
+//		}
 		
 		x = x + vx;
 		y = y + vy;
