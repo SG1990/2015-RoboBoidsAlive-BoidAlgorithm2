@@ -53,9 +53,9 @@ public class Boid extends WorldObject {
 			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
 			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
 			
-			if((Math.abs(vx - oldvx) > 0.15))
+			if((Math.abs(vx - oldvx) > 1))
 					vx = oldvx;
-			if((Math.abs(vy - oldvy) > 0.15))
+			if((Math.abs(vy - oldvy) > 1))
 					vy = oldvy;
 		}	
 		
@@ -105,8 +105,8 @@ public class Boid extends WorldObject {
 			v1[1] = v1[1] / neighbours.size();
 		}
 		
-		v1[0] = (v1[0] - vx) * 0.1;
-		v1[1] = (v1[1] - vy) * 0.1;
+		v1[0] = v1[0] * 0.1;
+		v1[1] = v1[1] * 0.1;
 		
 		return v1;
 	}
