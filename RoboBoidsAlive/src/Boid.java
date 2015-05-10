@@ -2,7 +2,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,7 +16,7 @@ public class Boid extends WorldObject {
 	private final double sizeX = 12.5;
     private final double sizeY = 22.5;
 	private final double radius = 35;		
-	private final double angle = 20;		
+	private final double angle = 30;		
 	private final double minDistance = 17;	
 	private final double strictMinDistance = 11.5;
 	private final double maxVelocity = 3;
@@ -319,5 +322,23 @@ public class Boid extends WorldObject {
         g2d.setTransform(oldTransform);    
         
         g2d.dispose();		
+	}
+	public void drawScanArea(Graphics g) {
+		
+		Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setColor(Color.pink);
+        
+        Arc2D.Double arc = new Arc2D.Double(Arc2D.PIE);
+        arc.setArcByCenter(x, y, radius, 
+        		getRotationAngle()-angle, 
+        		angle*2, 
+        		Arc2D.PIE);
+        g2d.draw(arc);
+        
+        g2d.dispose();	
+		
+	}
+	private double getRotationAngle() {
+		return (double) 360-Math.toDegrees(Math.atan2(vy,vx));
 	}
 }

@@ -99,6 +99,10 @@ public final class World extends JPanel implements ActionListener, KeyListener, 
     }
 
 	private void paintBoids(Graphics g) {
+		
+		if (selectedBoid != null)
+			selectedBoid.drawScanArea(g);
+		
 		for(Boid b : boids)
 			b.draw(g);
 		drawSelectedBoidInfo(g);
