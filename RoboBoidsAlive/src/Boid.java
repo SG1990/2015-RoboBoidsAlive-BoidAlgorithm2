@@ -66,10 +66,10 @@ public class Boid extends WorldObject {
 			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
 			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
 			
-			if((Math.abs(vx - oldvx) > 1))
-					vx = oldvx;
-			if((Math.abs(vy - oldvy) > 1))
-					vy = oldvy;
+//			if((Math.abs(vx - oldvx) > 1))
+//					vx = oldvx;
+//			if((Math.abs(vy - oldvy) > 1))
+//					vy = oldvy;
 		}	
 		
 //		World world = World.getInstance(); //TODO: Not driving through other robots
@@ -258,11 +258,10 @@ public class Boid extends WorldObject {
 	}
 	
 	private double getAngleBetween(double x1, double y1, double x2, double y2) {		
-		double aob = (x1 * x2) + (y1 * y2);
-		double axb = (Math.sqrt(Math.pow(x1, 2) + Math.pow(y1, 2))) * 
-				(Math.sqrt(Math.pow(x2, 2) + Math.pow(y2, 2)));
-		
-		return Math.acos(aob/axb);
+		return Math.abs(
+				Math.toDegrees(Math.atan2(y1,x1)) - 
+				Math.toDegrees(Math.atan2(y2,x2))
+			);
 	}
 	
 	private void checkVelocity() {
