@@ -114,8 +114,8 @@ public final class World extends JPanel implements ActionListener, KeyListener, 
 			Graphics2D g2d = (Graphics2D) g.create();
 			
         	g2d.setColor(Color.black);
-        	g2d.drawString("Pos ["+(int)selectedBoid.x+","+(int)selectedBoid.y+"]", (int)selectedBoid.x+5, (int)selectedBoid.y+13); 
-        	g2d.drawString("Vel ["+String.format("%1$,.2f",selectedBoid.vx)+","+String.format("%1$,.2f", selectedBoid.vy)+"]", (int)selectedBoid.x+5, (int)selectedBoid.y); 
+        	g2d.drawString("Pos ["+String.format("%1$,.2f",selectedBoid.x)+" ; "+String.format("%1$,.2f",selectedBoid.y)+"]", (int)selectedBoid.x+5, (int)selectedBoid.y+13); 
+        	g2d.drawString("Vel ["+String.format("%1$,.2f",selectedBoid.vx)+" ; "+String.format("%1$,.2f", selectedBoid.vy)+"]", (int)selectedBoid.x+5, (int)selectedBoid.y); 
         	g2d.drawString("Ngb ["+selectedBoid.getNeighbours().size()+"]", (int)selectedBoid.x+5, (int)selectedBoid.y-13); 
         	
         	g2d.dispose();

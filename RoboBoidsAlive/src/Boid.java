@@ -79,11 +79,41 @@ public class Boid extends WorldObject {
 //			}			
 //		}
 		
-		x = x + vx;
-		y = y + vy;
+		updatePosition();
 		
 		checkVelocity();
 		checkBounds();
+	}
+	private void updatePosition() {
+		
+		double newVelX = vx;
+		double newVelY = vy;
+				
+		for(Boid b : World.getInstance().boids) {
+			if(b != this) {
+				
+				double dist = Math.sqrt(Math.pow(b.getX() - x+newVelX, 2) + Math.pow(b.getY() - y+newVelY, 2));
+				if(dist <= getRadius())	{				
+					
+					double overlap = getRadius() - dist;
+					
+					double xToN = b.x - x+newVelX;
+					double yToN = b.y - y+newVelX;
+					
+					double normXToN = xToN/dist;
+					double normYToN = yToN/dist;
+					
+					double modX = -normXToN * overlap;
+					double modY = -normYToN * overlap;
+					
+					newVelX += modX;
+					newVelY += modY;
+				}
+			}			
+		}
+		
+		x += newVelX;
+		y += newVelY;
 	}
 	
 	ArrayList<Boid> getNeighbours() {
