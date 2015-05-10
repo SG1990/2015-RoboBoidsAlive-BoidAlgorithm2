@@ -18,7 +18,6 @@ public class Boid extends WorldObject {
 	private final double radius = 35;		
 	private final double angle = 30;		
 	private final double minDistance = 17;	
-	private final double strictMinDistance = 11.5;
 	private final double maxVelocity = 3;
 	double vx;
 	double vy;
@@ -65,19 +64,7 @@ public class Boid extends WorldObject {
 			
 			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
 			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
-			
-//			if((Math.abs(vx - oldvx) > 1))
-//					vx = oldvx;
-//			if((Math.abs(vy - oldvy) > 1))
-//					vy = oldvy;
 		}	
-		
-//		World world = World.getInstance(); //TODO: Not driving through other robots
-//		for(Boid n : world.boids) {
-//			if(n != this) {
-//				
-//			}			
-//		}
 		
 		updatePosition();
 		
@@ -122,11 +109,18 @@ public class Boid extends WorldObject {
 		
 		for(Boid n : world.boids) {
 			if(n != this) {
-				//check if in range - if distance is less than our radius; get from the readings
+				//check if in range - if distance is less than our radius;
+				double[] roboCoords = getRobotCoords(n.getX(), n.getY());
+				
 				if(Math.sqrt(Math.pow(n.getX() - x, 2) + Math.pow(n.getY() - y, 2)) <= radius)	{				
-					if(getAngleBetween(vx, vy, n.getX() - x, n.getY() - y) <= angle)
+					if(Math.toDegrees(getAngleBetween(vx, vy, n.getX() - x, n.getY() - y)) <= angle)
 						neighbours.add(n);			
 				}
+				
+//				if(Math.sqrt(Math.pow(roboCoords[0] - x, 2) + Math.pow(roboCoords[1] - y, 2)) <= radius)	{				
+//					if(Math.toDegrees(getAngleBetween(vx, vy, roboCoords[0] - x, roboCoords[1] - y)) <= angle)
+//						neighbours.add(n);			
+//				}
 			}			
 		}
 		
@@ -228,6 +222,7 @@ public class Boid extends WorldObject {
 		
 		//calculate d and round it up
 		double realD = Math.sqrt(Math.pow(lCoords[0], 2) + Math.pow(lCoords[1], 2));
+		//System.out.println(realD);
 		if(realD < 5) realD = 5;
 		else if(realD > 45) realD = 45;
 		else realD = Math.round(realD/5) * 5;
@@ -288,10 +283,7 @@ public class Boid extends WorldObject {
 	}
 	
 	private double getAngleBetween(double x1, double y1, double x2, double y2) {		
-		return Math.abs(
-				Math.toDegrees(Math.atan2(y1,x1)) - 
-				Math.toDegrees(Math.atan2(y2,x2))
-			);
+		return Math.abs(Math.atan2(y1,x1) - Math.atan2(y2,x2));
 	}
 	
 	private void checkVelocity() {
