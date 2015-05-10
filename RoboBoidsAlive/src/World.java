@@ -1,8 +1,11 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -12,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 
-public final class World extends JPanel implements ActionListener, MouseListener {
+public final class World extends JPanel implements ActionListener, KeyListener, MouseListener {
 
 	private static final long serialVersionUID = 1L;
 	private Random r = new Random();
@@ -21,10 +24,14 @@ public final class World extends JPanel implements ActionListener, MouseListener
 	private World() {
 		this.setBackground(Color.white);
 		this.setSize(new Dimension(boundsX, boundsY));
+		this.addKeyListener(this);
 		this.addMouseListener(this);
 		
         timer.start();
         timerStatus = true;
+        
+        setFocusable(true);
+        requestFocusInWindow();
 	}
 	
 	public static World getInstance(){
@@ -57,6 +64,17 @@ public final class World extends JPanel implements ActionListener, MouseListener
 			{{18,13},{10,21},{25,32},{25,43},{25,52},{25,63},{25,75},{14,86},{8,92}},
 			{{23,8},{11,20},{25,30},{25,46},{25,58},{25,69},{0,0},{4,96},{0,100}}
 	};
+	
+	private Boid selectedBoid = null;
+	private void setSelected(Boid b){
+		if (selectedBoid != null)
+			selectedBoid.setSelected(false);
+		
+		selectedBoid = b;
+		
+		if (b != null)
+			selectedBoid.setSelected(true);
+	}
 		
 	public void createBoid(){
 		Boid b = new Boid() ;
@@ -83,6 +101,21 @@ public final class World extends JPanel implements ActionListener, MouseListener
 	private void paintBoids(Graphics g) {
 		for(Boid b : boids)
 			b.draw(g);
+		drawSelectedBoidInfo(g);
+	}
+
+	private void drawSelectedBoidInfo(Graphics g) {
+		if (selectedBoid != null){
+			
+			Graphics2D g2d = (Graphics2D) g.create();
+			
+        	g2d.setColor(Color.black);
+        	g2d.drawString("Pos ["+(int)selectedBoid.x+","+(int)selectedBoid.y+"]", (int)selectedBoid.x+5, (int)selectedBoid.y+13); 
+        	g2d.drawString("Vel ["+String.format("%1$,.2f",selectedBoid.vx)+","+String.format("%1$,.2f", selectedBoid.vy)+"]", (int)selectedBoid.x+5, (int)selectedBoid.y); 
+        	g2d.drawString("Ngb ["+selectedBoid.getNeighbours().size()+"]", (int)selectedBoid.x+5, (int)selectedBoid.y-13); 
+        	
+        	g2d.dispose();
+        }
 	}
 
 	@Override
@@ -94,7 +127,10 @@ public final class World extends JPanel implements ActionListener, MouseListener
 	}	
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
+	public void keyTyped(KeyEvent e) {
+		if (e.getKeyChar() != ' ')
+			return;
+		
 		if(timerStatus) {
 			timer.stop();
 			timerStatus = false;
@@ -108,14 +144,44 @@ public final class World extends JPanel implements ActionListener, MouseListener
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) { }
+	public void keyPressed(KeyEvent arg0) {}
 
 	@Override
-	public void mouseExited(MouseEvent e) { }
+	public void keyReleased(KeyEvent arg0) {}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		for(Boid b : boids){
+			if (dist(e.getPoint().x, e.getPoint().y, (int)b.x, (int)b.y) < b.getRadius()){
+				
+				if (b == selectedBoid)
+					setSelected(null);
+				else 
+					setSelected(b);
+				
+				this.repaint();
+				return;
+			}
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {}
+
+	@Override
+	public void mouseExited(MouseEvent e) {}
 
 	@Override
 	public void mousePressed(MouseEvent e) {}
 
 	@Override
-	public void mouseReleased(MouseEvent e) { }
+	public void mouseReleased(MouseEvent e) {}
+	
+	private double dist(int x1, int y1, int x2, int y2){
+		
+		int x = x2 - x1;
+		int y = y2 - y1;
+		
+		return Math.sqrt(x*x + y*y);
+	}
 }

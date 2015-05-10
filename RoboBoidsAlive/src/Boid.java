@@ -17,7 +17,10 @@ public class Boid extends WorldObject {
 	private final double minDistance = 17;	
 	private final double strictMinDistance = 11.5;
 	private final double maxVelocity = 3;
-	private double vx, vy, oldvx, oldvy;
+	double vx;
+	double vy;
+	private double oldvx;
+	private double oldvy;
 	
 	public double getVX() { return vx; }
 	public void setVX(double vx) { this.vx = vx; }
@@ -27,6 +30,13 @@ public class Boid extends WorldObject {
 	
 	public double getSizeX() { return sizeY; }
 	public double getSizeY() { return sizeY; }
+	
+	public double getRadius() { return Math.max(sizeX,  sizeY);}
+	
+	private boolean selected = false;
+	public void setSelected(boolean selected){
+		this.selected = selected;
+	}
 	
 	public Boid() {
 		Random r = new Random();
@@ -73,7 +83,7 @@ public class Boid extends WorldObject {
 		checkBounds();
 	}
 	
-	private ArrayList<Boid> getNeighbours() {
+	ArrayList<Boid> getNeighbours() {
 		World world = World.getInstance();
 		ArrayList<Boid> neighbours = new ArrayList<Boid>();
 		
@@ -275,10 +285,11 @@ public class Boid extends WorldObject {
 	@Override
 	public void draw(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create(); //TODO Move to boid class
-        g2d.setColor(Color.orange);
-        
+		
         AffineTransform oldTransform = g2d.getTransform();
         g2d.translate(x, y);
+        
+        g2d.setColor(Color.orange);
         
         GeneralPath rectangle = new GeneralPath();  
         rectangle.moveTo(-sizeX/2, -sizeY/2);
@@ -305,7 +316,8 @@ public class Boid extends WorldObject {
         g2d.fill(rectangle);
         g2d.setColor(Color.red);
         g2d.fill(head);   
-        g2d.setTransform(oldTransform);        
+        g2d.setTransform(oldTransform);    
+        
         g2d.dispose();		
 	}
 }
